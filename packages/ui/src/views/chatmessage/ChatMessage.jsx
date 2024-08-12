@@ -64,6 +64,7 @@ import './ChatMessage.css'
 import chatmessageApi from '@/api/chatmessage'
 import chatflowsApi from '@/api/chatflows'
 import predictionApi from '@/api/prediction'
+import guideAnswerApi from '@/api/guidedAnswer'
 import chatmessagefeedbackApi from '@/api/chatmessagefeedback'
 import leadsApi from '@/api/lead'
 
@@ -97,6 +98,7 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
     const closeSnackbar = (...args) => dispatch(closeSnackbarAction(...args))
 
     const [userInput, setUserInput] = useState('')
+    const [guidedQuestion, setGuidedQuestion] = useState([])
     const [loading, setLoading] = useState(false)
     const [messages, setMessages] = useState([
         {
@@ -119,6 +121,7 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
     const getChatflowConfig = useApi(chatflowsApi.getSpecificChatflow)
 
     const [starterPrompts, setStarterPrompts] = useState([])
+    const [isGuidedAnswerOn, setIsGuidedAnswerOn] = useState(false)
 
     // feedback
     const [chatFeedbackStatus, setChatFeedbackStatus] = useState(false)
@@ -526,6 +529,7 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
         if (selectedInput !== undefined && selectedInput.trim() !== '') input = selectedInput
 
         setLoading(true)
+        setGuidedQuestion([])
         const urls = previews.map((item) => {
             return {
                 data: item.data,
@@ -574,12 +578,12 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
                     })
                 }
 
-                if (!isChatFlowAvailableToStream) {
-                    let text = ''
-                    if (data.text) text = data.text
-                    else if (data.json) text = '```json\n' + JSON.stringify(data.json, null, 2)
-                    else text = JSON.stringify(data, null, 2)
+                let text = ''
+                if (data.text) text = data.text
+                else if (data.json) text = '```json\n' + JSON.stringify(data.json, null, 2)
+                else text = JSON.stringify(data, null, 2)
 
+                if (!isChatFlowAvailableToStream) {
                     setMessages((prevMessages) => [
                         ...prevMessages,
                         {
@@ -602,6 +606,16 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
                     inputRef.current?.focus()
                     scrollToBottom()
                 }, 100)
+
+                // if (isGuidedAnswerOn) {
+                //     const guideAnswerParams = {
+                //         question: text,
+                //         chatId
+                //     }
+                //     const guide = await guideAnswerApi.sendMessageAndGetGuideAnswer(chatflowid, guideAnswerParams)
+                //     const guidedAnswer = JSON.parse(guide.data)
+                //     setGuidedQuestion(guidedAnswer.questions)
+                // }
             }
         } catch (error) {
             handleError(error.response.data.message)
@@ -706,6 +720,26 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [getChatmessageApi.data])
 
+    const getGuidedQuestions = useCallback(async (guideAnswerParams) => {
+        const guide = await guideAnswerApi.sendMessageAndGetGuideAnswer(chatflowid, guideAnswerParams)
+        const guidedAnswer = JSON.parse(guide.data)
+        setGuidedQuestion(guidedAnswer.questions)
+    }, [])
+
+    useEffect(() => {
+        if (isGuidedAnswerOn) {
+            const lastMessage = messages.length > 0 ? messages[messages.length - 1] : undefined
+            if (lastMessage && lastMessage.type == 'apiMessage' && lastMessage.id) {
+                const guideAnswerParams = {
+                    question: lastMessage.message,
+                    chatId
+                }
+
+                getGuidedQuestions(guideAnswerParams)
+            }
+        }
+    }, [isGuidedAnswerOn, messages, getGuidedQuestions])
+
     // Get chatflow streaming capability
     useEffect(() => {
         if (getIsChatflowStreamingApi.data) {
@@ -735,6 +769,9 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
                         }
                     })
                     setStarterPrompts(inputFields.filter((field) => field.prompt !== ''))
+                }
+                if (config.isGuidedAnswerOn) {
+                    setIsGuidedAnswerOn(true)
                 }
                 if (config.chatFeedback) {
                     setChatFeedbackStatus(config.chatFeedback.status)
@@ -1549,6 +1586,21 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
                     <StarterPromptsCard
                         sx={{ bottom: previews && previews.length > 0 ? 70 : 0 }}
                         starterPrompts={starterPrompts || []}
+                        onPromptClick={handlePromptClick}
+                        isGrid={isDialog}
+                    />
+                </div>
+            )}
+
+            {messages && messages.length > 1 && isGuidedAnswerOn && guidedQuestion.length > 0 && (
+                <div style={{ position: 'relative' }}>
+                    <StarterPromptsCard
+                        sx={{ bottom: previews && previews.length > 0 ? 70 : 0 }}
+                        starterPrompts={
+                            guidedQuestion.map((question) => ({
+                                prompt: question
+                            })) || []
+                        }
                         onPromptClick={handlePromptClick}
                         isGrid={isDialog}
                     />

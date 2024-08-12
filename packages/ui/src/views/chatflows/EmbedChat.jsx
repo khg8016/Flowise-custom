@@ -153,8 +153,8 @@ const chatwindowConfig = (isReact = false) => {
                         backgroundColor: '#ffffff',
                         textColor: '#303235',
                         sendButtonColor: '#3B81F6',
-                        maxChars: 50,
-                        maxCharsWarningMessage: 'You exceeded the characters limit. Please input less than 50 characters.',
+                        maxChars: 200,
+                        maxCharsWarningMessage: 'You exceeded the characters limit. Please input less than 200 characters.',
                         autoFocus: true, // If not used, autofocus is disabled on mobile and enabled on desktop. true enables it on both, false disables it on both.
                         sendMessageSound: true,
                         // sendSoundLocation: "send_message.mp3", // If this is not used, the default sound effect will be played if sendSoundMessage is true.
@@ -200,8 +200,8 @@ const chatwindowConfig = (isReact = false) => {
                     backgroundColor: '#ffffff',
                     textColor: '#303235',
                     sendButtonColor: '#3B81F6',
-                    maxChars: 50,
-                    maxCharsWarningMessage: 'You exceeded the characters limit. Please input less than 50 characters.',
+                    maxChars: 200,
+                    maxCharsWarningMessage: 'You exceeded the characters limit. Please input less than 200 characters.',
                     autoFocus: true, // If not used, autofocus is disabled on mobile and enabled on desktop. true enables it on both, false disables it on both.
                     sendMessageSound: true,
                     // sendSoundLocation: "send_message.mp3", // If this is not used, the default sound effect will be played if sendSoundMessage is true.
