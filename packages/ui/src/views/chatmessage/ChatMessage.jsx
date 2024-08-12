@@ -730,10 +730,16 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
         if (isGuidedAnswerOn) {
             const lastMessage = messages.length > 0 ? messages[messages.length - 1] : undefined
             if (lastMessage && lastMessage.type == 'apiMessage' && lastMessage.id) {
+                const lastMessages = messages.slice(-5)
+                const history = lastMessages.map((message) => `${message.type}: ${message.message}`).join(' \n ')
                 const guideAnswerParams = {
-                    question: lastMessage.message,
+                    question: history,
                     chatId
                 }
+                // const guideAnswerParams = {
+                //     question: lastMessage.message,
+                //     chatId
+                // }
 
                 getGuidedQuestions(guideAnswerParams)
             }
