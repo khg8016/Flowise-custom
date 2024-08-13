@@ -15,8 +15,9 @@ import useNotifier from '@/utils/useNotifier'
 
 // API
 import chatflowsApi from '@/api/chatflows'
+import { TextField } from '@mui/material'
 
-const GuidedAnswer = ({ dialogProps }) => {
+const FollowupQuestion = ({ dialogProps }) => {
     const dispatch = useDispatch()
 
     useNotifier()
@@ -26,14 +27,19 @@ const GuidedAnswer = ({ dialogProps }) => {
 
     const [chatbotConfig, setChatbotConfig] = useState({})
 
-    const [isGuidedAnswerOn, setIsGuidedAnswerOn] = useState(false)
+    const [prompt, setPrompt] = useState('')
+
+    // const [isFollowupQuestionOn, setIsFollowupQuestionOn] = useState(false)
+
+    const handleChange = (evnt) => {
+        const { value } = evnt.target
+        setPrompt(value)
+    }
 
     const onSave = useCallback(async () => {
         try {
-            let value = {
-                isGuidedAnswerOn
-            }
-            chatbotConfig.isGuidedAnswerOn = value.isGuidedAnswerOn
+            // chatbotConfig.isFollowupQuestionOn = value.isFollowupQuestionOn
+            chatbotConfig.followupQuestionPrompt = prompt
             const saveResp = await chatflowsApi.updateChatflow(dialogProps.chatflow.id, {
                 chatbotConfig: JSON.stringify(chatbotConfig)
             })
@@ -69,20 +75,21 @@ const GuidedAnswer = ({ dialogProps }) => {
                 }
             })
         }
-    }, [isGuidedAnswerOn, chatbotConfig])
+    }, [prompt, chatbotConfig])
 
     useEffect(() => {
         if (dialogProps.chatflow && dialogProps.chatflow.chatbotConfig) {
             try {
                 let chatbotConfig = JSON.parse(dialogProps.chatflow.chatbotConfig)
                 setChatbotConfig(chatbotConfig || {})
-                if (chatbotConfig.isGuidedAnswerOn) {
-                    setIsGuidedAnswerOn(true)
+                if (chatbotConfig.followupQuestionPrompt && chatbotConfig.followupQuestionPrompt !== '') {
+                    setPrompt(chatbotConfig.followupQuestionPrompt)
+                    // setIsFollowupQuestionOn(true)
                 } else {
-                    setIsGuidedAnswerOn(false)
+                    // setIsFollowupQuestionOn(false)
                 }
             } catch (e) {
-                setIsGuidedAnswerOn(false)
+                // setIsFollowupQuestionOn(false)
             }
         }
 
@@ -97,7 +104,8 @@ const GuidedAnswer = ({ dialogProps }) => {
                     flexDirection: 'column',
                     borderRadius: 10,
                     background: '#d8f3dc',
-                    padding: 10
+                    padding: 10,
+                    marginBottom: '20px'
                 }}
             >
                 <div
@@ -108,17 +116,20 @@ const GuidedAnswer = ({ dialogProps }) => {
                     }}
                 >
                     <IconBulb size={30} color='#2d6a4f' />
-                    <span style={{ color: '#2d6a4f', marginLeft: 10, fontWeight: 500 }}>Guided Answer</span>
+                    <span style={{ color: '#2d6a4f', marginLeft: 10, fontWeight: 500 }}>Write a prompt for Follow-up Questions</span>
                 </div>
             </div>
-            <Box sx={{ '& > :not(style)': { m: 1 }, pt: 2 }}>
+            <Box sx={{ width: '100%', mb: 1 }}>
+                <TextField style={{ width: '100%' }} multiline onChange={(e) => handleChange(e)} value={prompt} minRows={10} />
+            </Box>
+            {/* <Box sx={{ '& > :not(style)': { m: 1 }, pt: 2 }}>
                 <Switch
-                    checked={isGuidedAnswerOn}
+                    checked={isFollowupQuestionOn}
                     onChange={(e) => {
-                        setIsGuidedAnswerOn(e.target.checked)
+                        setIsFollowupQuestionOn(e.target.checked)
                     }}
                 />
-            </Box>
+            </Box> */}
             <StyledButton variant='contained' onClick={onSave}>
                 Save
             </StyledButton>
@@ -126,11 +137,11 @@ const GuidedAnswer = ({ dialogProps }) => {
     )
 }
 
-GuidedAnswer.propTypes = {
+FollowupQuestion.propTypes = {
     show: PropTypes.bool,
     dialogProps: PropTypes.object,
     onCancel: PropTypes.func,
     onConfirm: PropTypes.func
 }
 
-export default GuidedAnswer
+export default FollowupQuestion

@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import { Box, Dialog, DialogContent, DialogTitle, Tabs, Tab } from '@mui/material'
 import { tabsClasses } from '@mui/material/Tabs'
 import SpeechToText from '@/ui-component/extended/SpeechToText'
-import GuidedAnswer from '@/ui-component/extended/GuidedAnswer'
+import FollowupQuestion from '@/ui-component/extended/FollowupQuestion'
 import RateLimit from '@/ui-component/extended/RateLimit'
 import AllowedDomains from '@/ui-component/extended/AllowedDomains'
 import ChatFeedback from '@/ui-component/extended/ChatFeedback'
@@ -22,8 +22,8 @@ const CHATFLOW_CONFIGURATION_TABS = [
         id: 'conversationStarters'
     },
     {
-        label: 'Guided Answer',
-        id: 'guidedAnswers'
+        label: 'Follow-up Questions',
+        id: 'followupQuestions'
     },
     {
         label: 'Speech to Text',
@@ -121,7 +121,7 @@ const ChatflowConfigurationDialog = ({ show, dialogProps, onCancel }) => {
                     <TabPanel key={index} value={tabValue} index={index}>
                         {item.id === 'rateLimiting' && <RateLimit />}
                         {item.id === 'conversationStarters' ? <StarterPrompts dialogProps={dialogProps} /> : null}
-                        {item.id === 'guidedAnswers' ? <GuidedAnswer dialogProps={dialogProps} /> : null}
+                        {item.id === 'followupQuestions' ? <FollowupQuestion dialogProps={dialogProps} /> : null}
                         {item.id === 'speechToText' ? <SpeechToText dialogProps={dialogProps} /> : null}
                         {item.id === 'chatFeedback' ? <ChatFeedback dialogProps={dialogProps} /> : null}
                         {item.id === 'allowedDomains' ? <AllowedDomains dialogProps={dialogProps} /> : null}

@@ -1,21 +1,28 @@
 import { Request, Response, NextFunction } from 'express'
 import { IncomingInput } from '../../Interface'
 import runOnlyLLM from '../../services/run-llm'
+import chatflowsService from '../../services/chatflows'
 
 // Send input message and get prediction result (Internal)
 const createGuideAnswer = async (req: Request, res: Response, next: NextFunction) => {
     let incomingInput: IncomingInput = req.body
 
+    const chatflow = await chatflowsService.getChatflowById(req.params.id)
+    if (!chatflow) {
+        return res.status(404).send(`Chatflow ${req.params.id} not found`)
+    }
+
+    const chatbotConfig = JSON.parse(chatflow.chatbotConfig)
     const prompt = `
-        You are an intelligent assistant specializing in generating relevant follow-up questions based on a conversation history. 
-        The conversation history provided below is between a user and a GPT specialized in finding people or startups with specific conditions.
-        Given the following conversation history, generate three logical and relevant follow-up questions that the user might ask next. 
-        These questions should be based on the user's request to find people or startups and should help the user further refine or explore their search.
+        You are an intelligent assistant specializing in generating relevant follow-up questions for user based on a conversation history. 
+        ${chatbotConfig.followupQuestionPrompt}
+        
+        Conversation History:
+        ----
+        ${incomingInput.question}
+        ----
 
         Return the questions in a JSON format as an array of strings.
-
-        Conversation History:
-        ${incomingInput.question}
 
         Example Response:
         {

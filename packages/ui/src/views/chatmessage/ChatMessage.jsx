@@ -98,7 +98,7 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
     const closeSnackbar = (...args) => dispatch(closeSnackbarAction(...args))
 
     const [userInput, setUserInput] = useState('')
-    const [guidedQuestion, setGuidedQuestion] = useState([])
+    const [followupQuestion, setFollowupQuestion] = useState([])
     const [loading, setLoading] = useState(false)
     const [messages, setMessages] = useState([
         {
@@ -121,7 +121,7 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
     const getChatflowConfig = useApi(chatflowsApi.getSpecificChatflow)
 
     const [starterPrompts, setStarterPrompts] = useState([])
-    const [isGuidedAnswerOn, setIsGuidedAnswerOn] = useState(false)
+    const [followupQuestionPrompt, setFollowupQuestionPrompt] = useState('')
 
     // feedback
     const [chatFeedbackStatus, setChatFeedbackStatus] = useState(false)
@@ -529,7 +529,7 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
         if (selectedInput !== undefined && selectedInput.trim() !== '') input = selectedInput
 
         setLoading(true)
-        setGuidedQuestion([])
+        setFollowupQuestion([])
         const urls = previews.map((item) => {
             return {
                 data: item.data,
@@ -720,14 +720,14 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [getChatmessageApi.data])
 
-    const getGuidedQuestions = useCallback(async (guideAnswerParams) => {
-        const guide = await guideAnswerApi.sendMessageAndGetGuideAnswer(chatflowid, guideAnswerParams)
-        const guidedAnswer = JSON.parse(guide.data)
-        setGuidedQuestion(guidedAnswer.questions)
+    const getFollowupQuestions = useCallback(async (guideAnswerParams) => {
+        const guide = await guideAnswerApi.sendMessageAndGetFollowupQuestion(chatflowid, guideAnswerParams)
+        const followupQuestion = JSON.parse(guide.data)
+        setFollowupQuestion(followupQuestion.questions)
     }, [])
 
     useEffect(() => {
-        if (isGuidedAnswerOn) {
+        if (followupQuestionPrompt !== '') {
             const lastMessage = messages.length > 0 ? messages[messages.length - 1] : undefined
             if (lastMessage && lastMessage.type == 'apiMessage' && lastMessage.id) {
                 const lastMessages = messages.slice(-5)
@@ -741,10 +741,10 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
                 //     chatId
                 // }
 
-                getGuidedQuestions(guideAnswerParams)
+                getFollowupQuestions(guideAnswerParams)
             }
         }
-    }, [isGuidedAnswerOn, messages, getGuidedQuestions])
+    }, [followupQuestionPrompt, messages, getFollowupQuestions])
 
     // Get chatflow streaming capability
     useEffect(() => {
@@ -776,8 +776,8 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
                     })
                     setStarterPrompts(inputFields.filter((field) => field.prompt !== ''))
                 }
-                if (config.isGuidedAnswerOn) {
-                    setIsGuidedAnswerOn(true)
+                if (config.followupQuestionPrompt && config.followupQuestionPrompt !== '') {
+                    setFollowupQuestionPrompt(config.followupQuestionPrompt)
                 }
                 if (config.chatFeedback) {
                     setChatFeedbackStatus(config.chatFeedback.status)
@@ -1598,12 +1598,12 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
                 </div>
             )}
 
-            {messages && messages.length > 1 && isGuidedAnswerOn && guidedQuestion.length > 0 && (
+            {messages && messages.length > 1 && followupQuestionPrompt != '' && followupQuestion.length > 0 && (
                 <div style={{ position: 'relative' }}>
                     <StarterPromptsCard
                         sx={{ bottom: previews && previews.length > 0 ? 70 : 0 }}
                         starterPrompts={
-                            guidedQuestion.map((question) => ({
+                            followupQuestion.map((question) => ({
                                 prompt: question
                             })) || []
                         }
