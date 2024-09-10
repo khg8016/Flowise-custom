@@ -64,7 +64,6 @@ import './ChatMessage.css'
 import chatmessageApi from '@/api/chatmessage'
 import chatflowsApi from '@/api/chatflows'
 import predictionApi from '@/api/prediction'
-import guideAnswerApi from '@/api/guidedAnswer'
 import chatmessagefeedbackApi from '@/api/chatmessagefeedback'
 import leadsApi from '@/api/lead'
 
@@ -78,6 +77,8 @@ import { enqueueSnackbar as enqueueSnackbarAction, closeSnackbar as closeSnackba
 // Utils
 import { isValidURL, removeDuplicateURL, setLocalStorageChatflow, getLocalStorageChatflow } from '@/utils/genericHelper'
 import useNotifier from '@/utils/useNotifier'
+
+import guideAnswerApi from '@/api/guidedAnswer'
 
 const messageImageStyle = {
     width: '128px',
