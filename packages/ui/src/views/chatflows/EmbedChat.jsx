@@ -296,6 +296,8 @@ const chatwindowConfig = (isReact = false) => {
                     companyLink: 'https://flowiseai.com',
                 }
             }`
+}
+
 const customStringify = (obj) => {
     let stringified = JSON.stringify(obj, null, 4)
         .replace(/"([^"]+)":/g, '$1:')

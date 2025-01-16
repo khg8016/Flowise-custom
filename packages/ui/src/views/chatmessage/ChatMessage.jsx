@@ -781,7 +781,7 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
 
         setLoading(true)
         setFollowupQuestion([])
-        const uploads = previews.map((item) => {
+        let uploads = previews.map((item) => {
             return {
                 data: item.data,
                 type: item.type,
